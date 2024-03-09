@@ -35,8 +35,29 @@ class Database implements DatabaseInterface
         if (!$args) {
             return $query;
         }
+        if (count($args) == 1) {
+            $query = str_replace("?", "'" . $args[0] . "'", $query);
+        } else {
+            $res = '';
+            for ($i = 0; $i < count($args[0]); $i++) {
+                if ($i > 0) {
+                    $res .= ', ';
+                }
+                $res .= '`' . $args[0][$i] . '`';
+            }
 
-        $query = str_replace("?", "'" . $args[0] . "'", $query);
+            $query = str_replace("#", '', $query);
+
+            $counter = 0;
+            for ($i = 0; $i < strlen($query); $i++) {
+                if ($query[$i] == '?' and $query[$i + 1] !== 'd') {
+                    $query = substr($query, 0, $i) . $res . substr($query, $i + 1, strlen($query));
+                } else if (substr($query, $i, 2) == '?d') {
+                    $query = substr($query, 0, $i) . $args[$counter + 1] . substr($query, $i + 2, strlen($query));
+                    $counter++;
+                }
+            }
+        }
         return $query;
     }
 
