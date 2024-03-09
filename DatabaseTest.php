@@ -19,10 +19,10 @@ class DatabaseTest
 
         $results[] = $this->db->buildQuery('SELECT name FROM users WHERE user_id = 1');
 
-        // $results[] = $this->db->buildQuery(
-        //     'SELECT * FROM users WHERE name = ? AND block = 0',
-        //     ['Jack']
-        // );
+        $results[] = $this->db->buildQuery(
+            'SELECT * FROM users WHERE name = ? AND block = 0',
+            ['Jack']
+        );
 
         // $results[] = $this->db->buildQuery(
         //     'SELECT ?# FROM users WHERE user_id = ?d AND block = ?d',
@@ -43,7 +43,7 @@ class DatabaseTest
 
         $correct = [
             'SELECT name FROM users WHERE user_id = 1',
-            // 'SELECT * FROM users WHERE name = \'Jack\' AND block = 0',
+            'SELECT * FROM users WHERE name = \'Jack\' AND block = 0',
             // 'SELECT `name`, `email` FROM users WHERE user_id = 2 AND block = 1',
             // 'UPDATE users SET `name` = \'Jack\', `email` = NULL WHERE user_id = -1',
             // 'SELECT name FROM users WHERE `user_id` IN (1, 2, 3)',

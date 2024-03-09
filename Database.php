@@ -17,6 +17,10 @@ class Database implements DatabaseInterface
             name text NOT NULL,
             block int(11) NOT NULL
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+        $this->mysqli->query("INSERT INTO users(name, block) VALUES ('bob', 1)");
+        echo "Created users table and some user." . PHP_EOL;
+
+
 
     }
     public function __construct(mysqli $mysqli)
@@ -31,7 +35,9 @@ class Database implements DatabaseInterface
         if (!$args) {
             return $query;
         }
-        throw new Exception();
+
+        $query = str_replace("?", "'" . $args[0] . "'", $query);
+        return $query;
     }
 
     public function skip()
