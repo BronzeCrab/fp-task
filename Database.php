@@ -7,7 +7,7 @@ use mysqli;
 
 class Database implements DatabaseInterface
 {
-    private mysqli $mysqli;
+    public mysqli $mysqli;
     private string $unique_skip_ident = '0c97e6257d8de32a3983cdc10f523799';
 
     private function __fill_db()
@@ -16,9 +16,12 @@ class Database implements DatabaseInterface
         $this->mysqli->query("CREATE TABLE IF NOT EXISTS users (
             user_id int primary key NOT NULL AUTO_INCREMENT,
             name text NOT NULL,
-            block int(11) NOT NULL
+            block int(11) NOT NULL,
+            email text NOT NULL
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
-        $this->mysqli->query("INSERT INTO users(name, block) VALUES ('bob', 1)");
+        $this->mysqli->query("INSERT INTO users(name, block, email) VALUES ('Jack', 1, 'test@test.ru')");
+        $this->mysqli->query("INSERT INTO users(name, block, email) VALUES ('Jack', 2, 'test@test2.ru')");
+        $this->mysqli->query("INSERT INTO users(name, block, email) VALUES ('Jack', 1, 'test@test2.ru')");
         echo "Created users table and some user." . PHP_EOL;
     }
 

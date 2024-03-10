@@ -97,7 +97,7 @@ class DatabaseTest
         try {
             $block = true;
             $result = $this->db->buildQuery(
-                'SELECT name FROM users WHERE ?# IN (?a){ AND block = ?d}{',
+                'SELECT name FROM users WHERE ?# IN (?a){ AND block = ?d} } {',
                 ['user_id', [1, 2, 3], $block ?? $this->db->skip()]
             );
         } catch (Exception $e) {
@@ -109,4 +109,10 @@ class DatabaseTest
         }
     }
 
+    public function testDbQueries(): void
+    {
+        $query = 'SELECT name FROM users WHERE user_id = 1';
+        $query_result = $this->db->mysqli->query($query);
+        printf("Запрос SELECT вернул %d строк.\n", $query_result->num_rows);
+    }
 }
