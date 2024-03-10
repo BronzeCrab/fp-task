@@ -8,6 +8,7 @@ use mysqli;
 class Database implements DatabaseInterface
 {
     private mysqli $mysqli;
+    private string $unique_skip_ident = '0c97e6257d8de32a3983cdc10f523799';
 
     private function __fill_db()
     {
@@ -29,6 +30,10 @@ class Database implements DatabaseInterface
 
     public function buildQuery(string $query, array $args = []): string
     {
+        if (count($args) !== substr_count($query, '?')) {
+            throw new Exception("ERROR: args count != question marks count in query");
+        }
+
         if (!$args) {
             return $query;
         }
@@ -53,6 +58,9 @@ class Database implements DatabaseInterface
             }
             $query = str_replace("?a", $columns_names_and_values, $query);
         } else {
+            if (!is_array($args[0])) {
+                $args[0] = explode(",", $args[0]);
+            }
             $columns_names = '';
             for ($i = 0; $i < count($args[0]); $i++) {
                 if ($i > 0) {
@@ -61,15 +69,32 @@ class Database implements DatabaseInterface
                 $columns_names .= '`' . $args[0][$i] . '`';
             }
 
-            $query = str_replace("#", '', $query);
-
-            $counter = 0;
+            $args_counter = 0;
             for ($i = 0; $i < strlen($query); $i++) {
-                if ($query[$i] == '?' and $query[$i + 1] !== 'd') {
-                    $query = substr($query, 0, $i) . $columns_names . substr($query, $i + 1, strlen($query));
-                } else if (substr($query, $i, 2) == '?d') {
-                    $query = substr($query, 0, $i) . $args[$counter + 1] . substr($query, $i + 2, strlen($query));
-                    $counter++;
+                if (substr($query, $i, 2) === '?#') {
+                    $query = substr($query, 0, $i) . $columns_names . substr($query, $i + 2, strlen($query));
+                    $args_counter++;
+                } else if (substr($query, $i, 2) === '?d') {
+                    $query = substr($query, 0, $i) . $args[$args_counter] . substr($query, $i + 2, strlen($query));
+                    $args_counter++;
+                } else if (substr($query, $i, 2) === '?a') {
+                    $an_array = $args[$args_counter];
+                    $query = substr($query, 0, $i) . implode(', ', $an_array) . substr($query, $i + 2, strlen($query));
+                    $args_counter++;
+                } else if (substr($query, $i, 1) === '{') {
+                    if ($args[$args_counter] === $this->unique_skip_ident) {
+                        $j = 0;
+                        while ($i + $j < strlen($query)) {
+                            $j++;
+                            if ($query[$i + $j] === '}') {
+                                break;
+                            }
+                        }
+                        $query = substr($query, 0, $i) . substr($query, $i + $j + 1, strlen($query));
+                    } else {
+                        $query = str_replace("{", '', $query);
+                        $query = str_replace("}", '', $query);
+                    }
                 }
             }
         }
@@ -78,6 +103,6 @@ class Database implements DatabaseInterface
 
     public function skip()
     {
-        throw new Exception();
+        return $this->unique_skip_ident;
     }
 }

@@ -23,5 +23,6 @@ if ($mysqli->connect_errno) {
 $db = new Database($mysqli);
 $test = new DatabaseTest($db);
 $test->testBuildQuery();
+$test->additionalTestBuildQuery();
 
 exit('OK' . PHP_EOL);
