@@ -58,6 +58,7 @@ class DatabaseTest
     public function additionalTestBuildQuery(): void
     {
         // проверяем, что выбрасывается исключение:
+        $caught = false;
         try {
             $this->db->buildQuery(
                 'SELECT ?# FROM users WHERE user_id = ?d AND block = ?d',
@@ -65,6 +66,10 @@ class DatabaseTest
             );
         } catch (Exception $e) {
             echo 'Правильно выброшено исключение в доп. тесте: ', $e->getMessage(), "\n";
+            $caught = true;
+        }
+        if (!$caught) {
+            throw new Exception('Failure in add tests.');
         }
 
         // проверяем, что нормально отрабатывает ?f:
@@ -85,6 +90,22 @@ class DatabaseTest
         $correct = 'SELECT name FROM users WHERE `name` IN (\'test_name1\', \'test_name2\', \'test_name3\')';
         if ($result !== $correct) {
             throw new Exception('Failure2 in additionalTestBuildQuery.');
+        }
+
+        // проверяем, что выбрасывается исключение при дисбалансе фигруных скобок:
+        $caught = false;
+        try {
+            $block = true;
+            $result = $this->db->buildQuery(
+                'SELECT name FROM users WHERE ?# IN (?a){ AND block = ?d}{',
+                ['user_id', [1, 2, 3], $block ?? $this->db->skip()]
+            );
+        } catch (Exception $e) {
+            echo 'Правильно выброшено исключение в доп. тесте (дисбаланс фигурных): ', $e->getMessage(), "\n";
+            $caught = true;
+        }
+        if (!$caught) {
+            throw new Exception('Failure in add tests (no disbalance).');
         }
     }
 

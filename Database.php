@@ -44,6 +44,7 @@ class Database implements DatabaseInterface
                 // значения
                 if ($specifier === '?a') {
                     $parsed_str .= "'" . $an_array[$i] . "'";
+                    // идентификаторы
                 } else {
                     $parsed_str .= '`' . $an_array[$i] . '`';
                 }
@@ -87,6 +88,19 @@ class Database implements DatabaseInterface
         return $an_arg;
     }
 
+    private function __check_balance_of_curly_braces(string $query): bool
+    {
+        $some_stack = array();
+        for ($i = 0; $i < strlen($query); $i++) {
+            if ($query[$i] === "{") {
+                array_push($some_stack, $query[$i]);
+            } else if ($query[$i] === "}") {
+                array_pop($some_stack);
+            }
+        }
+        return count($some_stack) === 0;
+    }
+
     public function __construct(mysqli $mysqli)
     {
         $this->mysqli = $mysqli;
@@ -97,6 +111,10 @@ class Database implements DatabaseInterface
     {
         if (count($args) !== substr_count($query, '?')) {
             throw new Exception("ERROR: args count != question marks count in query");
+        }
+
+        if (!$this->__check_balance_of_curly_braces($query)) {
+            throw new Exception("ERROR: imbalance_of_curly_braces");
         }
 
         if (!$args) {

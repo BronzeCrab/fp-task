@@ -1,4 +1,10 @@
-## How to start project:
+## What I've done:
+
+I've added docker-compose file just in case.
+
+All tests are passed, also I added some my tests in func `additionalTestBuildQuery`.
+
+## How to start this task:
 
 1. Run mysql docker container:
 
