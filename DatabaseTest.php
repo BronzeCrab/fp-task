@@ -92,7 +92,7 @@ class DatabaseTest
             throw new Exception('Failure2 in additionalTestBuildQuery.');
         }
 
-        // проверяем, что выбрасывается исключение при дисбалансе фигруных скобок:
+        // проверяем, что выбрасывается исключение при дисбалансе фигурных скобок:
         $caught = false;
         try {
             $block = true;
@@ -113,6 +113,10 @@ class DatabaseTest
     {
         $query = 'SELECT name FROM users WHERE user_id = 1';
         $query_result = $this->db->mysqli->query($query);
+        $num_rows = $query_result->num_rows;
+        if ($num_rows === 0) {
+            throw new Exception('Failure in testDbQueries.');
+        }
         printf("Запрос SELECT вернул %d строк.\n", $query_result->num_rows);
     }
 }
