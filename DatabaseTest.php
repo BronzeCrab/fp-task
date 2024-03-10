@@ -29,10 +29,10 @@ class DatabaseTest
             [['name', 'email'], 2, true]
         );
 
-        // $results[] = $this->db->buildQuery(
-        //     'UPDATE users SET ?a WHERE user_id = -1',
-        //     [['name' => 'Jack', 'email' => null]]
-        // );
+        $results[] = $this->db->buildQuery(
+            'UPDATE users SET ?a WHERE user_id = -1',
+            [['name' => 'Jack', 'email' => null]]
+        );
 
         // foreach ([null, true] as $block) {
         //     $results[] = $this->db->buildQuery(
@@ -45,7 +45,7 @@ class DatabaseTest
             'SELECT name FROM users WHERE user_id = 1',
             'SELECT * FROM users WHERE name = \'Jack\' AND block = 0',
             'SELECT `name`, `email` FROM users WHERE user_id = 2 AND block = 1',
-            // 'UPDATE users SET `name` = \'Jack\', `email` = NULL WHERE user_id = -1',
+            'UPDATE users SET `name` = \'Jack\', `email` = NULL WHERE user_id = -1',
             // 'SELECT name FROM users WHERE `user_id` IN (1, 2, 3)',
             // 'SELECT name FROM users WHERE `user_id` IN (1, 2, 3) AND block = 1',
         ];
