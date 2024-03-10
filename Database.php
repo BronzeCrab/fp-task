@@ -20,8 +20,9 @@ class Database implements DatabaseInterface
             email text NOT NULL
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
         $this->mysqli->query("INSERT INTO users(name, block, email) VALUES ('Jack', 1, 'test@test.ru')");
-        $this->mysqli->query("INSERT INTO users(name, block, email) VALUES ('Jack', 2, 'test@test2.ru')");
         $this->mysqli->query("INSERT INTO users(name, block, email) VALUES ('Jack', 1, 'test@test2.ru')");
+        $this->mysqli->query("INSERT INTO users(name, block, email) VALUES ('Jack', 2, 'test@test2.ru')");
+        $this->mysqli->query("INSERT INTO users(name, block, email) VALUES ('Jack', 0, 'test@test2.ru')");
         echo "Created users table and some user." . PHP_EOL;
     }
 

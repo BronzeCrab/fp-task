@@ -111,12 +111,17 @@ class DatabaseTest
 
     public function testDbQueries(): void
     {
-        $query = 'SELECT name FROM users WHERE user_id = 1';
-        $query_result = $this->db->mysqli->query($query);
-        $num_rows = $query_result->num_rows;
-        if ($num_rows === 0) {
-            throw new Exception('Failure in testDbQueries.');
+        $queries = [
+            'SELECT name FROM users WHERE user_id = 1',
+            'SELECT * FROM users WHERE name = \'Jack\' AND block = 0',
+            'SELECT `name`, `email` FROM users WHERE user_id = 2 AND block = 1',
+        ];
+        foreach ($queries as $query) {
+            $query_result = $this->db->mysqli->query($query);
+            $num_rows = $query_result->num_rows;
+            if ($num_rows === 0) {
+                throw new Exception('Failure in testDbQueries.');
+            }
         }
-        printf("Запрос SELECT вернул %d строк.\n", $query_result->num_rows);
     }
 }
