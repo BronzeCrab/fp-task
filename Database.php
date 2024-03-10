@@ -77,6 +77,10 @@ class Database implements DatabaseInterface
                 } else if (substr($query, $i, 2) === '?d') {
                     $query = substr($query, 0, $i) . $args[$args_counter] . substr($query, $i + 2, strlen($query));
                     $args_counter++;
+                } else if (substr($query, $i, 2) === '?f') {
+                    $an_arg = floatval($args[$args_counter]);
+                    $query = substr($query, 0, $i) . $an_arg . substr($query, $i + 2, strlen($query));
+                    $args_counter++;
                 } else if (substr($query, $i, 2) === '?a') {
                     $an_array = $args[$args_counter];
                     $query = substr($query, 0, $i) . implode(', ', $an_array) . substr($query, $i + 2, strlen($query));

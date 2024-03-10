@@ -41,8 +41,6 @@ class DatabaseTest
             );
         }
 
-        var_dump($results);
-
         $correct = [
             'SELECT name FROM users WHERE user_id = 1',
             'SELECT * FROM users WHERE name = \'Jack\' AND block = 0',
@@ -59,9 +57,24 @@ class DatabaseTest
 
     public function additionalTestBuildQuery(): void
     {
-        if (1 === 0) {
-            throw new Exception('Failure in additional tests.');
+        try {
+            $this->db->buildQuery(
+                'SELECT ?# FROM users WHERE user_id = ?d AND block = ?d',
+                [['name', 'email'], 2, true, 1]
+            );
+        } catch (Exception $e) {
+            echo 'Правильно выброшено исключение в тесте: ', $e->getMessage(), "\n";
         }
+
+        $result = $this->db->buildQuery(
+            'SELECT ?# FROM users WHERE user_id = ?f AND block = ?f',
+            [['name', 'email'], '2.41test', true]
+        );
+        $correct = 'SELECT `name`, `email` FROM users WHERE user_id = 2.41 AND block = 1';
+        if ($result !== $correct) {
+            throw new Exception('Failure in additionalTestBuildQuery.');
+        }
+
     }
 
 }
