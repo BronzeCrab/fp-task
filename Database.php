@@ -33,7 +33,7 @@ class Database implements DatabaseInterface
         return 'not_array';
     }
 
-    private function __parse_sequential_array(array $an_array): string
+    private function __parse_sequential_array(array $an_array, string $specifier): string
     {
         $parsed_str = '';
         for ($i = 0; $i < count($an_array); $i++) {
@@ -41,7 +41,12 @@ class Database implements DatabaseInterface
                 $parsed_str .= ', ';
             }
             if (!is_int($an_array[$i])) {
-                $parsed_str .= '`' . $an_array[$i] . '`';
+                // значения
+                if ($specifier === '?a') {
+                    $parsed_str .= "'" . $an_array[$i] . "'";
+                } else {
+                    $parsed_str .= '`' . $an_array[$i] . '`';
+                }
             } else {
                 $parsed_str .= $an_array[$i];
             }
@@ -69,11 +74,11 @@ class Database implements DatabaseInterface
         return $parsed_str;
     }
 
-    private function __parse_arg($an_arg): string
+    private function __parse_arg($an_arg, string $specifier): string
     {
         $type_of_arg = $this->__check_type_of_arg($an_arg);
         if ($type_of_arg === 'sequential') {
-            $an_arg = $this->__parse_sequential_array($an_arg);
+            $an_arg = $this->__parse_sequential_array($an_arg, $specifier);
         } else if ($type_of_arg === 'associative') {
             $an_arg = $this->__parse_associative_array($an_arg);
         } else {
@@ -105,7 +110,7 @@ class Database implements DatabaseInterface
                 $query = substr($query, 0, $i) . $an_arg . substr($query, $i + 1, strlen($query));
             } else if (substr($query, $i, 2) === '?#') {
                 $an_arg = $args[$args_counter];
-                $an_arg = $this->__parse_arg($an_arg);
+                $an_arg = $this->__parse_arg($an_arg, '?#');
                 $query = substr($query, 0, $i) . $an_arg . substr($query, $i + 2, strlen($query));
                 $args_counter++;
             } else if (substr($query, $i, 2) === '?d') {
@@ -118,7 +123,7 @@ class Database implements DatabaseInterface
                 $args_counter++;
             } else if (substr($query, $i, 2) === '?a') {
                 $an_arg = $args[$args_counter];
-                $an_arg = $this->__parse_arg($an_arg);
+                $an_arg = $this->__parse_arg($an_arg, '?a');
                 $query = substr($query, 0, $i) . $an_arg . substr($query, $i + 2, strlen($query));
                 $args_counter++;
             } else if (substr($query, $i, 1) === '{') {

@@ -41,8 +41,6 @@ class DatabaseTest
             );
         }
 
-        var_dump($results);
-
         $correct = [
             'SELECT name FROM users WHERE user_id = 1',
             'SELECT * FROM users WHERE name = \'Jack\' AND block = 0',
@@ -59,6 +57,7 @@ class DatabaseTest
 
     public function additionalTestBuildQuery(): void
     {
+        // проверяем, что выбрасывается исключение:
         try {
             $this->db->buildQuery(
                 'SELECT ?# FROM users WHERE user_id = ?d AND block = ?d',
@@ -68,15 +67,25 @@ class DatabaseTest
             echo 'Правильно выброшено исключение в доп. тесте: ', $e->getMessage(), "\n";
         }
 
+        // проверяем, что нормально отрабатывает ?f:
         $result = $this->db->buildQuery(
             'SELECT ?# FROM users WHERE some_col = ?f AND block = ?d',
             [['name', 'email', 'some_col'], '2.41test', true]
         );
         $correct = 'SELECT `name`, `email`, `some_col` FROM users WHERE some_col = 2.41 AND block = 1';
         if ($result !== $correct) {
-            throw new Exception('Failure in additionalTestBuildQuery.');
+            throw new Exception('Failure1 in additionalTestBuildQuery.');
         }
 
+        // проверяем как работает массив значений:
+        $result = $this->db->buildQuery(
+            'SELECT name FROM users WHERE ?# IN (?a)',
+            ['name', ['test_name1', 'test_name2', 'test_name3']]
+        );
+        $correct = 'SELECT name FROM users WHERE `name` IN (\'test_name1\', \'test_name2\', \'test_name3\')';
+        if ($result !== $correct) {
+            throw new Exception('Failure2 in additionalTestBuildQuery.');
+        }
     }
 
 }
