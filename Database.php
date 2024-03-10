@@ -22,6 +22,66 @@ class Database implements DatabaseInterface
         echo "Created users table and some user." . PHP_EOL;
     }
 
+    private function __check_type_of_arg($an_arg): string
+    {
+        if (is_array($an_arg)) {
+            if (array_is_list($an_arg)) {
+                return 'sequential';
+            }
+            return 'associative';
+        }
+        return 'not_array';
+    }
+
+    private function __parse_sequential_array(array $an_array): string
+    {
+        $parsed_str = '';
+        for ($i = 0; $i < count($an_array); $i++) {
+            if ($i > 0) {
+                $parsed_str .= ', ';
+            }
+            if (!is_int($an_array[$i])) {
+                $parsed_str .= '`' . $an_array[$i] . '`';
+            } else {
+                $parsed_str .= $an_array[$i];
+            }
+        }
+        return $parsed_str;
+    }
+
+    private function __parse_associative_array(array $an_array): string
+    {
+        $parsed_str = '';
+        $counter = 0;
+        foreach ($an_array as $column_name => $column_value) {
+            if ($counter > 0) {
+                $parsed_str .= ', ';
+            }
+            $formated_column_name = '`' . $column_name . '`';
+            if ($column_value === null) {
+                $formated_column_value = "NULL";
+            } else {
+                $formated_column_value = "'" . $column_value . "'";
+            }
+            $parsed_str .= $formated_column_name . ' = ' . $formated_column_value;
+            $counter++;
+        }
+        return $parsed_str;
+    }
+
+    private function __parse_arg($an_arg): string
+    {
+        $type_of_arg = $this->__check_type_of_arg($an_arg);
+        if ($type_of_arg === 'sequential') {
+            $an_arg = $this->__parse_sequential_array($an_arg);
+        } else if ($type_of_arg === 'associative') {
+            $an_arg = $this->__parse_associative_array($an_arg);
+        } else {
+            $an_arg = "`" . $an_arg . "`";
+        }
+        return $an_arg;
+    }
+
     public function __construct(mysqli $mysqli)
     {
         $this->mysqli = $mysqli;
@@ -38,67 +98,42 @@ class Database implements DatabaseInterface
             return $query;
         }
 
-        if (count($args) == 1 and !(is_array($args[0]))) {
-            $query = str_replace("?", "'" . $args[0] . "'", $query);
-        } else if (count($args) == 1 and is_array($args[0])) {
-            $columns_names_and_values = '';
-            $counter = 0;
-            foreach ($args[0] as $column_name => $column_value) {
-                if ($counter > 0) {
-                    $columns_names_and_values .= ', ';
-                }
-                $formated_column_name = '`' . $column_name . '`';
-                if ($column_value === null) {
-                    $formated_column_value = "NULL";
-                } else {
-                    $formated_column_value = "'" . $column_value . "'";
-                }
-                $columns_names_and_values .= $formated_column_name . ' = ' . $formated_column_value;
-                $counter++;
-            }
-            $query = str_replace("?a", $columns_names_and_values, $query);
-        } else {
-            if (!is_array($args[0])) {
-                $args[0] = explode(",", $args[0]);
-            }
-            $columns_names = '';
-            for ($i = 0; $i < count($args[0]); $i++) {
-                if ($i > 0) {
-                    $columns_names .= ', ';
-                }
-                $columns_names .= '`' . $args[0][$i] . '`';
-            }
-
-            $args_counter = 0;
-            for ($i = 0; $i < strlen($query); $i++) {
-                if (substr($query, $i, 2) === '?#') {
-                    $query = substr($query, 0, $i) . $columns_names . substr($query, $i + 2, strlen($query));
-                    $args_counter++;
-                } else if (substr($query, $i, 2) === '?d') {
-                    $query = substr($query, 0, $i) . $args[$args_counter] . substr($query, $i + 2, strlen($query));
-                    $args_counter++;
-                } else if (substr($query, $i, 2) === '?f') {
-                    $an_arg = floatval($args[$args_counter]);
-                    $query = substr($query, 0, $i) . $an_arg . substr($query, $i + 2, strlen($query));
-                    $args_counter++;
-                } else if (substr($query, $i, 2) === '?a') {
-                    $an_array = $args[$args_counter];
-                    $query = substr($query, 0, $i) . implode(', ', $an_array) . substr($query, $i + 2, strlen($query));
-                    $args_counter++;
-                } else if (substr($query, $i, 1) === '{') {
-                    if ($args[$args_counter] === $this->unique_skip_ident) {
-                        $j = 0;
-                        while ($i + $j < strlen($query)) {
-                            $j++;
-                            if ($query[$i + $j] === '}') {
-                                break;
-                            }
+        $args_counter = 0;
+        for ($i = 0; $i < strlen($query); $i++) {
+            if ($query[$i] === '?' and !(in_array($query[$i + 1], ['#', 'd', 'f', 'a']))) {
+                $an_arg = "'" . $args[$args_counter] . "'";
+                $query = substr($query, 0, $i) . $an_arg . substr($query, $i + 1, strlen($query));
+            } else if (substr($query, $i, 2) === '?#') {
+                $an_arg = $args[$args_counter];
+                $an_arg = $this->__parse_arg($an_arg);
+                $query = substr($query, 0, $i) . $an_arg . substr($query, $i + 2, strlen($query));
+                $args_counter++;
+            } else if (substr($query, $i, 2) === '?d') {
+                $an_arg = intval($args[$args_counter]);
+                $query = substr($query, 0, $i) . $an_arg . substr($query, $i + 2, strlen($query));
+                $args_counter++;
+            } else if (substr($query, $i, 2) === '?f') {
+                $an_arg = floatval($args[$args_counter]);
+                $query = substr($query, 0, $i) . $an_arg . substr($query, $i + 2, strlen($query));
+                $args_counter++;
+            } else if (substr($query, $i, 2) === '?a') {
+                $an_arg = $args[$args_counter];
+                $an_arg = $this->__parse_arg($an_arg);
+                $query = substr($query, 0, $i) . $an_arg . substr($query, $i + 2, strlen($query));
+                $args_counter++;
+            } else if (substr($query, $i, 1) === '{') {
+                if ($args[$args_counter] === $this->unique_skip_ident) {
+                    $j = 0;
+                    while ($i + $j < strlen($query)) {
+                        $j++;
+                        if ($query[$i + $j] === '}') {
+                            break;
                         }
-                        $query = substr($query, 0, $i) . substr($query, $i + $j + 1, strlen($query));
-                    } else {
-                        $query = str_replace("{", '', $query);
-                        $query = str_replace("}", '', $query);
                     }
+                    $query = substr($query, 0, $i) . substr($query, $i + $j + 1, strlen($query));
+                } else {
+                    $query = str_replace("{", '', $query);
+                    $query = str_replace("}", '', $query);
                 }
             }
         }
