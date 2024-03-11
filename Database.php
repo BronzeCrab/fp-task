@@ -110,7 +110,7 @@ class Database implements DatabaseInterface
         return count($some_stack) === 0;
     }
 
-    // после главного цикла формируем окночательный разультат:
+    // после главного цикла формируем окончательный разультат:
     private function __convertToStrAndRemoveTrash(array $query_array, array $indexes_to_delete): string
     {
         $result_str = '';
