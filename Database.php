@@ -118,6 +118,7 @@ class Database implements DatabaseInterface
         }
         return $result_str;
     }
+
     private function __convertToMIXED(mixed $a_arg, string $specifier): mixed
     {
         if ($a_arg === null) {
