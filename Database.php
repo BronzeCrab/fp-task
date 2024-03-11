@@ -88,7 +88,10 @@ class Database implements DatabaseInterface
         } else if ($type_of_arg === 'associative') {
             $an_arg = $this->__parseAssociativeArray($an_arg);
         } else {
-            // тут это просто идентификатор
+            // тут это просто идентификатор, мб только строка.
+            if (!is_string($an_arg)) {
+                throw new Exception("ERROR: идентификатор должен быть строкой!");
+            }
             $an_arg = "`" . $an_arg . "`";
         }
         return $an_arg;
