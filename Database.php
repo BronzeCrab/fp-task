@@ -127,6 +127,12 @@ class Database implements DatabaseInterface
         if ($a_arg === null) {
             return 'NULL';
         }
+        if ($a_arg === true) {
+            return 1;
+        }
+        if ($a_arg === false) {
+            return 0;
+        }
         if ($specifier === '?d') {
             return intval($a_arg);
         }
@@ -159,8 +165,9 @@ class Database implements DatabaseInterface
         $args_counter = 0;
         $array_copy_of_query = str_split($query);
         $indexes_to_delete = array();
-        // занки вопроса - меняем в массиве array_copy_of_query сразу,
+        // Занки вопроса - меняем в массиве array_copy_of_query сразу,
         // а идентификаторы и фигурные скобки - просто помечаем на удаление после цилка.
+        // Чтобы не сделать так, чтобы длины массива и строки стали неравны. 
         for ($i = 0; $i < strlen($query); $i++) {
             if ($query[$i] === '?' and ($i === strlen($query) - 1 or !(in_array($query[$i + 1], ['#', 'd', 'f', 'a'])))) {
                 if (is_string($args[$args_counter])) {

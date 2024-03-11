@@ -138,12 +138,12 @@ class DatabaseTest
             throw new Exception('Failure5 in additionalTestBuildQuery.');
         }
 
-        // проверяем как отрабатывают два знака ?:
+        // проверяем как отрабатывают несколько знаков ? с разными значениями: 
         $result = $this->db->buildQuery(
-            'SELECT * FROM users WHERE name = ? AND block = ?',
-            ['Jack', 1]
+            'SELECT * FROM users WHERE name = ? AND block = ? AND some_col = ? AND another = ?',
+            ['Jack', 1, false, null]
         );
-        $correct = 'SELECT * FROM users WHERE name = \'Jack\' AND block = 1';
+        $correct = 'SELECT * FROM users WHERE name = \'Jack\' AND block = 1 AND some_col = 0 AND another = NULL';
         if ($result !== $correct) {
             throw new Exception('Failure6 in additionalTestBuildQuery.');
         }
