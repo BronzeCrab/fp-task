@@ -44,7 +44,7 @@ class Database implements DatabaseInterface
             if ($i > 0) {
                 $parsed_str .= ', ';
             }
-            if (!is_int($an_array[$i])) {
+            if (is_string($an_array[$i])) {
                 // значения
                 if ($specifier === '?a') {
                     $parsed_str .= "'" . $an_array[$i] . "'";
@@ -70,8 +70,10 @@ class Database implements DatabaseInterface
             $formated_column_name = '`' . $column_name . '`';
             if ($column_value === null) {
                 $formated_column_value = "NULL";
-            } else {
+            } else if (is_string($column_value)) {
                 $formated_column_value = "'" . $column_value . "'";
+            } else {
+                $formated_column_value = $column_value;
             }
             $parsed_str .= $formated_column_name . ' = ' . $formated_column_value;
             $counter++;

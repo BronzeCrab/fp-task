@@ -158,6 +158,17 @@ class DatabaseTest
             throw new Exception('Failure7 in additionalTestBuildQuery.');
         }
 
+        // проверяем как отрабатывает парсинг словаря с float:
+        $result = $this->db->buildQuery(
+            'UPDATE users SET ?a WHERE user_id = -1',
+            [['name' => 'Jack', 'email' => null, 'block' => 1.42]]
+        );
+        $correct = 'UPDATE users SET `name` = \'Jack\', `email` = NULL, `block` = 1.42 WHERE user_id = -1';
+        if ($result !== $correct) {
+            echo 'here' . PHP_EOL;
+            echo $result . PHP_EOL;
+            throw new Exception('Failure8 in additionalTestBuildQuery.');
+        }
     }
 
     public function testDbQueries(): void
