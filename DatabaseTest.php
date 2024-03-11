@@ -131,7 +131,7 @@ class DatabaseTest
             throw new Exception('Failure5 in additionalTestBuildQuery.');
         }
 
-        // проверяем как отрабатывают один знак ? и null:
+        // проверяем как отрабатывают два знака ? (есть один null):
 
     }
 

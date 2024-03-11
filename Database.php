@@ -127,7 +127,7 @@ class Database implements DatabaseInterface
 
         $args_counter = 0;
         for ($i = 0; $i < strlen($query); $i++) {
-            if ($query[$i] === '?' and ($query[$i] === strlen($query) - 1 or !(in_array($query[$i + 1], ['#', 'd', 'f', 'a'])))) {
+            if ($query[$i] === '?' and ($i === strlen($query) - 1 or !(in_array($query[$i + 1], ['#', 'd', 'f', 'a'])))) {
                 if (is_string($args[$args_counter])) {
                     $an_arg = "'" . $args[$args_counter] . "'";
                 } else {
