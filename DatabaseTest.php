@@ -150,10 +150,10 @@ class DatabaseTest
 
         // проверяем как отрабатывают три знака ? (есть один null и один skip):
         $result = $this->db->buildQuery(
-            'SELECT name FROM users WHERE ?# IN (?a){ AND block = ?d}{ AND user_id = ?d} AND name = ?',
-            ['name', ['test_name1', 'test_name2', 'test_name3'], null, $this->db->skip(), 42]
+            'SELECT name FROM users WHERE ?# IN (?a){ AND block = ?d}{ AND user_id = ?d} AND name = ? AND email = ?',
+            ['name', ['test_name1', 'test_name2', 'test_name3'], null, $this->db->skip(), 42, true]
         );
-        $correct = 'SELECT name FROM users WHERE `name` IN (\'test_name1\', \'test_name2\', \'test_name3\') AND block = NULL AND name = 42';
+        $correct = 'SELECT name FROM users WHERE `name` IN (\'test_name1\', \'test_name2\', \'test_name3\') AND block = NULL AND name = 42 AND email = 1';
         if ($result !== $correct) {
             throw new Exception('Failure7 in additionalTestBuildQuery.');
         }

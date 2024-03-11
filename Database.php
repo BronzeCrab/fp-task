@@ -87,6 +87,7 @@ class Database implements DatabaseInterface
         } else if ($type_of_arg === 'associative') {
             $an_arg = $this->__parseAssociativeArray($an_arg);
         } else {
+            // тут это просто идентификатор
             $an_arg = "`" . $an_arg . "`";
         }
         return $an_arg;
