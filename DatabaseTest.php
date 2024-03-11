@@ -74,10 +74,10 @@ class DatabaseTest
 
         // проверяем, что нормально отрабатывает ?f:
         $result = $this->db->buildQuery(
-            'SELECT ?# FROM users WHERE some_col = ?f AND block = ?d',
-            [['name', 'email', 'some_col'], '2.41test', true]
+            'SELECT ?# FROM users WHERE some_col = ?f AND block = ?d AND email = ?',
+            [['name', 'email', 'some_col'], '2.41test', true, null]
         );
-        $correct = 'SELECT `name`, `email`, `some_col` FROM users WHERE some_col = 2.41 AND block = 1';
+        $correct = 'SELECT `name`, `email`, `some_col` FROM users WHERE some_col = 2.41 AND block = 1 AND email = NULL';
         if ($result !== $correct) {
             throw new Exception('Failure1 in additionalTestBuildQuery.');
         }
@@ -149,6 +149,14 @@ class DatabaseTest
         }
 
         // проверяем как отрабатывают три знака ? (есть один null и один skip):
+        $result = $this->db->buildQuery(
+            'SELECT name FROM users WHERE ?# IN (?a){ AND block = ?d}{ AND user_id = ?d} AND name = ?',
+            ['name', ['test_name1', 'test_name2', 'test_name3'], null, $this->db->skip(), 42]
+        );
+        $correct = 'SELECT name FROM users WHERE `name` IN (\'test_name1\', \'test_name2\', \'test_name3\') AND block = NULL AND name = 42';
+        if ($result !== $correct) {
+            throw new Exception('Failure7 in additionalTestBuildQuery.');
+        }
 
     }
 

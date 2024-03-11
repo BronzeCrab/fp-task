@@ -115,6 +115,19 @@ class Database implements DatabaseInterface
         }
         return $result_str;
     }
+    private function __convertToMIXED(mixed $a_arg, string $specifier): mixed
+    {
+        if ($a_arg === null) {
+            return 'NULL';
+        }
+        if ($specifier === '?d') {
+            return intval($a_arg);
+        }
+        if ($specifier === '?f') {
+            return floatval($a_arg);
+        }
+        return $a_arg;
+    }
 
     public function __construct(mysqli $mysqli)
     {
@@ -129,7 +142,7 @@ class Database implements DatabaseInterface
         }
 
         if (!$this->__checkBalanceOfCurlyBraces($query)) {
-            throw new Exception("ERROR: imbalance_of_curly_braces");
+            throw new Exception("ERROR: imbalance of curly braces");
         }
 
         if (!$args) {
@@ -146,27 +159,20 @@ class Database implements DatabaseInterface
                 } else {
                     $an_arg = $args[$args_counter];
                 }
+                $an_arg = $this->__convertToMIXED($an_arg, '?');
                 $array_copy_of_query[$i] = $an_arg;
                 $args_counter++;
-            } else if (substr($query, $i, 2) === '?#') {
+            } else if (substr($query, $i, 2) === '?#' or substr($query, $i, 2) === '?a') {
                 $an_arg = $args[$args_counter];
-                $an_arg = $this->__parseArg($an_arg, '?#');
+                $specifier = substr($query, $i, 2);
+                $an_arg = $this->__parseArg($an_arg, $specifier);
                 $array_copy_of_query[$i] = $an_arg;
                 array_push($indexes_to_delete, $i + 1);
                 $args_counter++;
-            } else if (substr($query, $i, 2) === '?d') {
-                $an_arg = intval($args[$args_counter]);
-                $array_copy_of_query[$i] = $an_arg;
-                array_push($indexes_to_delete, $i + 1);
-                $args_counter++;
-            } else if (substr($query, $i, 2) === '?f') {
-                $an_arg = floatval($args[$args_counter]);
-                $array_copy_of_query[$i] = $an_arg;
-                array_push($indexes_to_delete, $i + 1);
-                $args_counter++;
-            } else if (substr($query, $i, 2) === '?a') {
+            } else if (substr($query, $i, 2) === '?d' or substr($query, $i, 2) === '?f') {
                 $an_arg = $args[$args_counter];
-                $an_arg = $this->__parseArg($an_arg, '?a');
+                $specifier = substr($query, $i, 2);
+                $an_arg = $this->__convertToMIXED($an_arg, $specifier);
                 $array_copy_of_query[$i] = $an_arg;
                 array_push($indexes_to_delete, $i + 1);
                 $args_counter++;
@@ -182,7 +188,7 @@ class Database implements DatabaseInterface
                     }
                 }
                 if ($args[$args_counter] === $this->unique_skip_ident) {
-                    // mark del all indexes from i+1 to k-1
+                    // mark to del all indexes from i+1 to k-1
                     for ($z = $i + 1; $z < $k; $z++) {
                         array_push($indexes_to_delete, $z);
                     }
