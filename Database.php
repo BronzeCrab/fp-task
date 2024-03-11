@@ -105,6 +105,17 @@ class Database implements DatabaseInterface
         return count($some_stack) === 0;
     }
 
+    private function __convertToStrAndRemoveTrash(array $query_array, array $indexes_to_delete): string
+    {
+        $result_str = '';
+        for ($i = 0; $i < count($query_array); $i++) {
+            if (!in_array($i, $indexes_to_delete)) {
+                $result_str .= $query_array[$i];
+            }
+        }
+        return $result_str;
+    }
+
     public function __construct(mysqli $mysqli)
     {
         $this->mysqli = $mysqli;
@@ -126,6 +137,8 @@ class Database implements DatabaseInterface
         }
 
         $args_counter = 0;
+        $array_copy_of_query = str_split($query);
+        $indexes_to_delete = array();
         for ($i = 0; $i < strlen($query); $i++) {
             if ($query[$i] === '?' and ($i === strlen($query) - 1 or !(in_array($query[$i + 1], ['#', 'd', 'f', 'a'])))) {
                 if (is_string($args[$args_counter])) {
@@ -133,43 +146,53 @@ class Database implements DatabaseInterface
                 } else {
                     $an_arg = $args[$args_counter];
                 }
-                $query = substr($query, 0, $i) . $an_arg . substr($query, $i + 1, strlen($query));
+                $array_copy_of_query[$i] = $an_arg;
                 $args_counter++;
             } else if (substr($query, $i, 2) === '?#') {
                 $an_arg = $args[$args_counter];
                 $an_arg = $this->__parseArg($an_arg, '?#');
-                $query = substr($query, 0, $i) . $an_arg . substr($query, $i + 2, strlen($query));
+                $array_copy_of_query[$i] = $an_arg;
+                array_push($indexes_to_delete, $i + 1);
                 $args_counter++;
             } else if (substr($query, $i, 2) === '?d') {
                 $an_arg = intval($args[$args_counter]);
-                $query = substr($query, 0, $i) . $an_arg . substr($query, $i + 2, strlen($query));
+                $array_copy_of_query[$i] = $an_arg;
+                array_push($indexes_to_delete, $i + 1);
                 $args_counter++;
             } else if (substr($query, $i, 2) === '?f') {
                 $an_arg = floatval($args[$args_counter]);
-                $query = substr($query, 0, $i) . $an_arg . substr($query, $i + 2, strlen($query));
+                $array_copy_of_query[$i] = $an_arg;
+                array_push($indexes_to_delete, $i + 1);
                 $args_counter++;
             } else if (substr($query, $i, 2) === '?a') {
                 $an_arg = $args[$args_counter];
                 $an_arg = $this->__parseArg($an_arg, '?a');
-                $query = substr($query, 0, $i) . $an_arg . substr($query, $i + 2, strlen($query));
+                $array_copy_of_query[$i] = $an_arg;
+                array_push($indexes_to_delete, $i + 1);
                 $args_counter++;
-            } else if (substr($query, $i, 1) === '{') {
+            } else if ($query[$i] === '{') {
+                array_push($indexes_to_delete, $i);
                 $j = 0;
                 while ($i + $j < strlen($query)) {
                     $j++;
                     if ($query[$i + $j] === '}') {
                         $k = $i + $j;
+                        array_push($indexes_to_delete, $k);
                         break;
                     }
                 }
                 if ($args[$args_counter] === $this->unique_skip_ident) {
-                    $query = substr($query, 0, $i) . substr($query, $k + 1, strlen($query));
-                } else {
-                    $query = substr($query, 0, $i) . substr($query, $i + 1, $j - 1) . substr($query, $k + 1, strlen($query));
+                    // mark del all indexes from i+1 to k-1
+                    for ($z = $i + 1; $z < $k; $z++) {
+                        array_push($indexes_to_delete, $z);
+                    }
                 }
             }
         }
-        return $query;
+
+        $result = $this->__convertToStrAndRemoveTrash($array_copy_of_query, $indexes_to_delete);
+
+        return $result;
     }
 
     public function skip()

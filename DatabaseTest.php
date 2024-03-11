@@ -118,6 +118,16 @@ class DatabaseTest
             throw new Exception('Failure3 in additionalTestBuildQuery.');
         }
 
+        // проверяем как отрабатывает запрос с двумя условиями (певрое - skip):
+        $result = $this->db->buildQuery(
+            'SELECT name FROM users WHERE ?# IN (?a){ AND block = ?d}{ AND user_id = ?d}',
+            ['name', ['test_name1', 'test_name2', 'test_name3'], $this->db->skip(), 42]
+        );
+        $correct = 'SELECT name FROM users WHERE `name` IN (\'test_name1\', \'test_name2\', \'test_name3\') AND user_id = 42';
+        if ($result !== $correct) {
+            throw new Exception('Failure4 in additionalTestBuildQuery.');
+        }
+
         // проверяем как отрабатывает запрос с двумя условиями (второе - skip):
         $result = $this->db->buildQuery(
             'SELECT name FROM users WHERE ?# IN (?a){ AND block = ?d}{ AND user_id = ?d}',
@@ -125,7 +135,7 @@ class DatabaseTest
         );
         $correct = 'SELECT name FROM users WHERE `name` IN (\'test_name1\', \'test_name2\', \'test_name3\') AND block = 1';
         if ($result !== $correct) {
-            throw new Exception('Failure4 in additionalTestBuildQuery.');
+            throw new Exception('Failure5 in additionalTestBuildQuery.');
         }
 
         // проверяем как отрабатывают два знака ?:
@@ -135,7 +145,7 @@ class DatabaseTest
         );
         $correct = 'SELECT * FROM users WHERE name = \'Jack\' AND block = 1';
         if ($result !== $correct) {
-            throw new Exception('Failure5 in additionalTestBuildQuery.');
+            throw new Exception('Failure6 in additionalTestBuildQuery.');
         }
 
         // проверяем как отрабатывают три знака ? (есть один null и один skip):
