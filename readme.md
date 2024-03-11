@@ -2,7 +2,8 @@
 
 I've added docker-compose file just in case.
 
-All tests are passed, also I added some my tests in func `additionalTestBuildQuery`.
+All tests are passed, also I added some my tests in funcs `additionalTestBuildQuery` and 
+`testDbQueries`.
 
 ## How to start this task:
 

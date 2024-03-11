@@ -24,8 +24,7 @@ $db = new Database($mysqli);
 $test = new DatabaseTest($db);
 $test->testBuildQuery();
 $test->additionalTestBuildQuery();
-echo 'Все тесты прошли успешно.' . PHP_EOL;
-
 $test->testDbQueries();
+echo 'Все тесты прошли успешно.' . PHP_EOL;
 exit('OK' . PHP_EOL);
 

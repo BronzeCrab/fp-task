@@ -154,18 +154,18 @@ class Database implements DatabaseInterface
                 $query = substr($query, 0, $i) . $an_arg . substr($query, $i + 2, strlen($query));
                 $args_counter++;
             } else if (substr($query, $i, 1) === '{') {
-                if ($args[$args_counter] === $this->unique_skip_ident) {
-                    $j = 0;
-                    while ($i + $j < strlen($query)) {
-                        $j++;
-                        if ($query[$i + $j] === '}') {
-                            break;
-                        }
+                $j = 0;
+                while ($i + $j < strlen($query)) {
+                    $j++;
+                    if ($query[$i + $j] === '}') {
+                        $k = $i + $j;
+                        break;
                     }
-                    $query = substr($query, 0, $i) . substr($query, $i + $j + 1, strlen($query));
+                }
+                if ($args[$args_counter] === $this->unique_skip_ident) {
+                    $query = substr($query, 0, $i) . substr($query, $k + 1, strlen($query));
                 } else {
-                    $query = str_replace("{", '', $query);
-                    $query = str_replace("}", '', $query);
+                    $query = substr($query, 0, $i) . substr($query, $i + 1, $j - 1) . substr($query, $k + 1, strlen($query));
                 }
             }
         }

@@ -119,19 +119,26 @@ class DatabaseTest
         }
 
         // проверяем как отрабатывает запрос с двумя условиями (второе - skip):
+        $result = $this->db->buildQuery(
+            'SELECT name FROM users WHERE ?# IN (?a){ AND block = ?d}{ AND user_id = ?d}',
+            ['name', ['test_name1', 'test_name2', 'test_name3'], 1, $this->db->skip()]
+        );
+        $correct = 'SELECT name FROM users WHERE `name` IN (\'test_name1\', \'test_name2\', \'test_name3\') AND block = 1';
+        if ($result !== $correct) {
+            throw new Exception('Failure4 in additionalTestBuildQuery.');
+        }
 
         // проверяем как отрабатывают два знака ?:
         $result = $this->db->buildQuery(
             'SELECT * FROM users WHERE name = ? AND block = ?',
             ['Jack', 1]
         );
-        echo $result . PHP_EOL;
         $correct = 'SELECT * FROM users WHERE name = \'Jack\' AND block = 1';
         if ($result !== $correct) {
             throw new Exception('Failure5 in additionalTestBuildQuery.');
         }
 
-        // проверяем как отрабатывают два знака ? (есть один null):
+        // проверяем как отрабатывают три знака ? (есть один null и один skip):
 
     }
 
