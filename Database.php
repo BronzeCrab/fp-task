@@ -156,6 +156,8 @@ class Database implements DatabaseInterface
         $args_counter = 0;
         $array_copy_of_query = str_split($query);
         $indexes_to_delete = array();
+        // занки вопроса - меняем в массиве array_copy_of_query сразу,
+        // а идентификаторы и фигурные скобки - просто помечаем на удаление после цилка.
         for ($i = 0; $i < strlen($query); $i++) {
             if ($query[$i] === '?' and ($i === strlen($query) - 1 or !(in_array($query[$i + 1], ['#', 'd', 'f', 'a'])))) {
                 if (is_string($args[$args_counter])) {
