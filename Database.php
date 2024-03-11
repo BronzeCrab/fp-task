@@ -10,6 +10,7 @@ class Database implements DatabaseInterface
     public mysqli $mysqli;
     private string $unique_skip_ident = '0c97e6257d8de32a3983cdc10f523799';
 
+    // решил немного заполнить бд:
     private function __fillDb()
     {
         echo "Try to fill the db" . PHP_EOL;
@@ -95,6 +96,7 @@ class Database implements DatabaseInterface
         return $an_arg;
     }
 
+    // проверка баланса фигурных скобок, юзаем массив как стек:
     private function __checkBalanceOfCurlyBraces(string $query): bool
     {
         $some_stack = array();
@@ -108,6 +110,7 @@ class Database implements DatabaseInterface
         return count($some_stack) === 0;
     }
 
+    // после главного цикла формируем окночательный разультат:
     private function __convertToStrAndRemoveTrash(array $query_array, array $indexes_to_delete): string
     {
         $result_str = '';
