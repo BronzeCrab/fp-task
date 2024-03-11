@@ -82,12 +82,12 @@ class DatabaseTest
             throw new Exception('Failure1 in additionalTestBuildQuery.');
         }
 
-        // проверяем как работает массив значений:
+        // проверяем как работает массив значений c разными аргументами:
         $result = $this->db->buildQuery(
             'SELECT name FROM users WHERE ?# IN (?a)',
-            ['name', ['test_name1', 'test_name2', 'test_name3']]
+            ['name', ['test_name1', 'test_name2', 'test_name3', null, false, true]]
         );
-        $correct = 'SELECT name FROM users WHERE `name` IN (\'test_name1\', \'test_name2\', \'test_name3\')';
+        $correct = 'SELECT name FROM users WHERE `name` IN (\'test_name1\', \'test_name2\', \'test_name3\', NULL, 0, 1)';
         if ($result !== $correct) {
             throw new Exception('Failure2 in additionalTestBuildQuery.');
         }
@@ -158,12 +158,12 @@ class DatabaseTest
             throw new Exception('Failure7 in additionalTestBuildQuery.');
         }
 
-        // проверяем как отрабатывает парсинг словаря с float:
+        // проверяем как отрабатывает парсинг словаря с float, NULL, true, false :
         $result = $this->db->buildQuery(
             'UPDATE users SET ?a WHERE user_id = -1',
-            [['name' => 'Jack', 'email' => null, 'block' => 1.42]]
+            [['name' => 'Jack', 'email' => null, 'block' => 1.42, 's1' => null, 's2' => true, 's3' => false]]
         );
-        $correct = 'UPDATE users SET `name` = \'Jack\', `email` = NULL, `block` = 1.42 WHERE user_id = -1';
+        $correct = 'UPDATE users SET `name` = \'Jack\', `email` = NULL, `block` = 1.42, `s1` = NULL, `s2` = 1, `s3` = 0 WHERE user_id = -1';
         if ($result !== $correct) {
             throw new Exception('Failure8 in additionalTestBuildQuery.');
         }

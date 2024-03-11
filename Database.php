@@ -54,7 +54,7 @@ class Database implements DatabaseInterface
                     $parsed_str .= '`' . $an_array[$i] . '`';
                 }
             } else {
-                $parsed_str .= $an_array[$i];
+                $parsed_str .= $this->__convertToMIXED($an_array[$i]);
             }
         }
         return $parsed_str;
@@ -69,12 +69,10 @@ class Database implements DatabaseInterface
                 $parsed_str .= ', ';
             }
             $formated_column_name = '`' . $column_name . '`';
-            if ($column_value === null) {
-                $formated_column_value = "NULL";
-            } else if (is_string($column_value)) {
+            if (is_string($column_value)) {
                 $formated_column_value = "'" . $column_value . "'";
             } else {
-                $formated_column_value = $column_value;
+                $formated_column_value = $this->__convertToMIXED($column_value);
             }
             $parsed_str .= $formated_column_name . ' = ' . $formated_column_value;
             $counter++;
@@ -122,7 +120,7 @@ class Database implements DatabaseInterface
         return $result_str;
     }
 
-    private function __convertToMIXED(mixed $a_arg, string $specifier): mixed
+    private function __convertToMIXED(mixed $a_arg, string $specifier = null): mixed
     {
         if ($a_arg === null) {
             return 'NULL';
