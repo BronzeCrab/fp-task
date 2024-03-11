@@ -127,9 +127,14 @@ class Database implements DatabaseInterface
 
         $args_counter = 0;
         for ($i = 0; $i < strlen($query); $i++) {
-            if ($query[$i] === '?' and !(in_array($query[$i + 1], ['#', 'd', 'f', 'a']))) {
-                $an_arg = "'" . $args[$args_counter] . "'";
+            if ($query[$i] === '?' and ($query[$i] === strlen($query) - 1 or !(in_array($query[$i + 1], ['#', 'd', 'f', 'a'])))) {
+                if (is_string($args[$args_counter])) {
+                    $an_arg = "'" . $args[$args_counter] . "'";
+                } else {
+                    $an_arg = $args[$args_counter];
+                }
                 $query = substr($query, 0, $i) . $an_arg . substr($query, $i + 1, strlen($query));
+                $args_counter++;
             } else if (substr($query, $i, 2) === '?#') {
                 $an_arg = $args[$args_counter];
                 $an_arg = $this->__parseArg($an_arg, '?#');

@@ -119,6 +119,20 @@ class DatabaseTest
         }
 
         // проверяем как отрабатывает запрос с двумя условиями (второе - skip):
+
+        // проверяем как отрабатывают два знака ?:
+        $result = $this->db->buildQuery(
+            'SELECT * FROM users WHERE name = ? AND block = ?',
+            ['Jack', 1]
+        );
+        echo $result . PHP_EOL;
+        $correct = 'SELECT * FROM users WHERE name = \'Jack\' AND block = 1';
+        if ($result !== $correct) {
+            throw new Exception('Failure5 in additionalTestBuildQuery.');
+        }
+
+        // проверяем как отрабатывают один знак ? и null:
+
     }
 
     public function testDbQueries(): void
