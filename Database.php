@@ -10,7 +10,7 @@ class Database implements DatabaseInterface
     public mysqli $mysqli;
     private string $unique_skip_ident = '0c97e6257d8de32a3983cdc10f523799';
 
-    private function __fill_db()
+    private function __fillDb()
     {
         echo "Try to fill the db" . PHP_EOL;
         $this->mysqli->query("CREATE TABLE IF NOT EXISTS users (
@@ -26,7 +26,7 @@ class Database implements DatabaseInterface
         echo "Created users table and some user." . PHP_EOL;
     }
 
-    private function __check_type_of_arg($an_arg): string
+    private function __checkTypeOfArg($an_arg): string
     {
         if (is_array($an_arg)) {
             if (array_is_list($an_arg)) {
@@ -37,7 +37,7 @@ class Database implements DatabaseInterface
         return 'not_array';
     }
 
-    private function __parse_sequential_array(array $an_array, string $specifier): string
+    private function __parseSequentialArray(array $an_array, string $specifier): string
     {
         $parsed_str = '';
         for ($i = 0; $i < count($an_array); $i++) {
@@ -59,7 +59,7 @@ class Database implements DatabaseInterface
         return $parsed_str;
     }
 
-    private function __parse_associative_array(array $an_array): string
+    private function __parseAssociativeArray(array $an_array): string
     {
         $parsed_str = '';
         $counter = 0;
@@ -79,20 +79,20 @@ class Database implements DatabaseInterface
         return $parsed_str;
     }
 
-    private function __parse_arg($an_arg, string $specifier): string
+    private function __parseArg($an_arg, string $specifier): string
     {
-        $type_of_arg = $this->__check_type_of_arg($an_arg);
+        $type_of_arg = $this->__checkTypeOfArg($an_arg);
         if ($type_of_arg === 'sequential') {
-            $an_arg = $this->__parse_sequential_array($an_arg, $specifier);
+            $an_arg = $this->__parseSequentialArray($an_arg, $specifier);
         } else if ($type_of_arg === 'associative') {
-            $an_arg = $this->__parse_associative_array($an_arg);
+            $an_arg = $this->__parseAssociativeArray($an_arg);
         } else {
             $an_arg = "`" . $an_arg . "`";
         }
         return $an_arg;
     }
 
-    private function __check_balance_of_curly_braces(string $query): bool
+    private function __checkBalanceOfCurlyBraces(string $query): bool
     {
         $some_stack = array();
         for ($i = 0; $i < strlen($query); $i++) {
@@ -108,7 +108,7 @@ class Database implements DatabaseInterface
     public function __construct(mysqli $mysqli)
     {
         $this->mysqli = $mysqli;
-        $this->__fill_db();
+        $this->__fillDb();
     }
 
     public function buildQuery(string $query, array $args = []): string
@@ -117,7 +117,7 @@ class Database implements DatabaseInterface
             throw new Exception("ERROR: args count != question marks count in query");
         }
 
-        if (!$this->__check_balance_of_curly_braces($query)) {
+        if (!$this->__checkBalanceOfCurlyBraces($query)) {
             throw new Exception("ERROR: imbalance_of_curly_braces");
         }
 
@@ -132,7 +132,7 @@ class Database implements DatabaseInterface
                 $query = substr($query, 0, $i) . $an_arg . substr($query, $i + 1, strlen($query));
             } else if (substr($query, $i, 2) === '?#') {
                 $an_arg = $args[$args_counter];
-                $an_arg = $this->__parse_arg($an_arg, '?#');
+                $an_arg = $this->__parseArg($an_arg, '?#');
                 $query = substr($query, 0, $i) . $an_arg . substr($query, $i + 2, strlen($query));
                 $args_counter++;
             } else if (substr($query, $i, 2) === '?d') {
@@ -145,7 +145,7 @@ class Database implements DatabaseInterface
                 $args_counter++;
             } else if (substr($query, $i, 2) === '?a') {
                 $an_arg = $args[$args_counter];
-                $an_arg = $this->__parse_arg($an_arg, '?a');
+                $an_arg = $this->__parseArg($an_arg, '?a');
                 $query = substr($query, 0, $i) . $an_arg . substr($query, $i + 2, strlen($query));
                 $args_counter++;
             } else if (substr($query, $i, 1) === '{') {

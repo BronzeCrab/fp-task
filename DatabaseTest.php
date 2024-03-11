@@ -107,6 +107,18 @@ class DatabaseTest
         if (!$caught) {
             throw new Exception('Failure in add tests (no disbalance).');
         }
+
+        // проверяем как отрабатывает запрос с двумя условиями (оба без skip):
+        $result = $this->db->buildQuery(
+            'SELECT name FROM users WHERE ?# IN (?a){ AND block = ?d}{ AND user_id = ?d}',
+            ['name', ['test_name1', 'test_name2', 'test_name3'], 1, 2]
+        );
+        $correct = 'SELECT name FROM users WHERE `name` IN (\'test_name1\', \'test_name2\', \'test_name3\') AND block = 1 AND user_id = 2';
+        if ($result !== $correct) {
+            throw new Exception('Failure3 in additionalTestBuildQuery.');
+        }
+
+        // проверяем как отрабатывает запрос с двумя условиями (второе - skip):
     }
 
     public function testDbQueries(): void
